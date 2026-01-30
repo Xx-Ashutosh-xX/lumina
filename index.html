@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lumina - Personal Finance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+</head>
+<body>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">✨</div>
+            <h2>Lumina</h2>
+        </div>
+
+        <nav class="side-nav">
+            <button class="nav-item active" onclick="switchView('dashboard', this)">
+                <span class="icon">📊</span> Dashboard
+            </button>
+            <button class="nav-item" onclick="switchView('history', this)">
+                <span class="icon">📝</span> History
+            </button>
+            <button class="nav-item" onclick="switchView('calendar', this)">
+                <span class="icon">📅</span> Calendar
+            </button>
+            <button class="nav-item" onclick="switchView('categories', this)">
+                <span class="icon">🏷️</span> Budgets
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button id="authorize_button" class="cta-button" style="background:#fff; color:#333; border:1px solid #ccc; margin-bottom:10px;" onclick="handleAuthClick()">
+                <span style="font-size:1.2rem">☁️</span> Connect Drive
+            </button>
+            <button class="cta-button" onclick="openModal()">
+                <span>+</span> Add New
+            </button>
+            <div id="sync_status" style="font-size:0.8rem; color:#888; text-align:center; margin-top:5px;">Not synced</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div class="header-title">
+                <h1 id="pageTitle">Overview</h1>
+                <p class="subtitle" id="currentDateDisplay">Today is...</p>
+            </div>
+
+            <div class="month-controller">
+                <button class="icon-btn" onclick="changeMonth(-1)">‹</button>
+                <span id="currentMonthYear">January 2026</span>
+                <button class="icon-btn" onclick="changeMonth(1)">›</button>
+            </div>
+        </header>
+
+        <div id="view-dashboard" class="view-section active fade-in">
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-icon">↓</div>
+                    <div>
+                        <div class="stat-label">Income</div>
+                        <div class="stat-value" id="totalIncome">$0</div>
+                    </div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-icon">↑</div>
+                    <div>
+                        <div class="stat-label">Expenses</div>
+                        <div class="stat-value" id="totalExpense">$0</div>
+                    </div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-icon">=</div>
+                    <div>
+                        <div class="stat-label">Balance</div>
+                        <div class="stat-value" id="totalBalance">$0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-split">
+                <div class="col-left">
+                     <div class="card">
+                        <div class="card-header">
+                            <h3>Category Budgets</h3>
+                            <button class="text-btn" onclick="openCatModal()">+ New</button>
+                        </div>
+                        <div class="budget-grid" id="dashboardBudgetGrid"></div>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <div class="card full-height">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                            <button class="text-btn" onclick="switchView('history', null)">See All</button>
+                        </div>
+                        <div class="transaction-list" id="dashboardTransList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-history" class="view-section fade-in" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>All Transactions</h3>
+                    <div class="stat-label">Click trash icon to remove</div>
+                </div>
+                <div class="history-list-header">
+                    <span>Category / Description</span>
+                    <span>Date</span>
+                    <span>Amount</span>
+                    <span>Action</span>
+                </div>
+                <div id="fullHistoryList" class="transaction-list full-page-list"></div>
+            </div>
+        </div>
+
+        <div id="view-calendar" class="view-section fade-in" style="display: none;">
+            <div class="calendar-wrapper card">
+                <div class="weekdays-header">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+            
+            <div class="card" style="margin-top: 40px;">
+                <div class="card-header">
+                    <h3 id="calSelectedDate">Select a date</h3>
+                </div>
+                <div id="calTransList" class="transaction-list"></div>
+            </div>
+        </div>
+
+        <div id="view-categories" class="view-section fade-in" style="display: none;">
+             <div class="card">
+                 <div class="card-header">
+                     <h3>Manage Categories</h3>
+                     <button class="cta-button small" onclick="openCatModal()">Create Category</button>
+                 </div>
+                 <div class="all-cats-list" id="allCatsList"></div>
+             </div>
+        </div>
+
+    </main>
+
+    <nav class="mobile-nav">
+        <button class="mob-nav-item active" onclick="switchView('dashboard', this)">
+            <span class="icon">📊</span>
+        </button>
+        <button class="mob-nav-item" onclick="switchView('history', this)">
+            <span class="icon">📝</span>
+        </button>
+        
+        <div class="mob-fab-container">
+            <button class="mob-fab" onclick="openModal()">+</button>
+        </div>
+
+        <button class="mob-nav-item" onclick="switchView('calendar', this)">
+            <span class="icon">📅</span>
+        </button>
+        <button class="mob-nav-item" onclick="switchView('categories', this)">
+            <span class="icon">🏷️</span>
+        </button>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="transModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>New Transaction</h3>
+            <button class="close-btn" onclick="closeModal('transModal')">×</button>
+        </div>
+        <div class="type-switcher">
+            <button id="typeExpense" class="switch-btn active" onclick="setTransType('expense')">Expense</button>
+            <button id="typeIncome" class="switch-btn" onclick="setTransType('income')">Income</button>
+        </div>
+        <div class="form-group">
+            <label>Amount</label>
+            <div class="input-wrapper">
+                <span>$</span>
+                <input type="number" id="inputAmount" placeholder="0.00" step="0.01">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Description (Optional)</label>
+            <input type="text" id="inputDesc" placeholder="e.g. Lunch with Mom">
+        </div>
+        <div class="form-group">
+            <label>Category</label>
+            <div class="category-select-grid" id="modalCatGrid"></div>
+        </div>
+        <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="inputDate">
+        </div>
+        <button class="cta-button full-width" onclick="submitTransaction()">Save Transaction</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="catModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>New Category</h3>
+            <button class="close-btn" onclick="closeModal('catModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="newCatName" placeholder="e.g. Groceries">
+        </div>
+        <div class="form-group">
+            <label>Budget Limit</label>
+            <input type="number" id="newCatLimit" placeholder="e.g. 500">
+        </div>
+        <div class="form-group">
+            <label>Color</label>
+            <div class="color-picker-row">
+                <input type="color" id="newCatColor" value="#FFB74D">
+                <span>Pick a color</span>
+            </div>
+        </div>
+        <button class="cta-button full-width" onclick="submitCategory()">Create Category</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
