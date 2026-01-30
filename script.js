@@ -191,7 +191,6 @@ function renderDashboard() {
         const spent = monthlyTrans.filter(t => t.catId === cat.id && t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
         const limit = cat.limit || 1; const remaining = limit - spent;
         const percent = Math.min(100, Math.max(0, (remaining / limit) * 100));
-        // FIXED: Added viewBox to SVG so it scales properly on mobile
         const r = 36; const c = 2 * Math.PI * r; const offset = c - (percent / 100) * c;
         const color = percent < 20 ? 'var(--danger)' : cat.color;
         const div = document.createElement('div'); div.className = 'budget-item';
@@ -273,7 +272,12 @@ function getMonthStats() {
     const expense = monthlyTrans.filter(t => t.type === 'expense').reduce((sum,t) => sum+t.amount, 0);
     return { income, expense, balance: income - expense, monthlyTrans };
 }
-function formatCurrency(num) { return '₹' + num.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
+
+// CHANGED: Use Rupee Symbol and Indian Number Formatting
+function formatCurrency(num) { 
+    return '₹' + num.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0}); 
+}
+
 function createTransactionEl(t, isHistoryRow) {
     const cat = state.categories.find(c => c.id === t.catId) || { name: 'Deleted', icon: '❓', color: '#ccc' };
     const dateStr = new Date(t.date).toLocaleDateString();
