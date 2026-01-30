@@ -273,7 +273,7 @@ function getMonthStats() {
     const expense = monthlyTrans.filter(t => t.type === 'expense').reduce((sum,t) => sum+t.amount, 0);
     return { income, expense, balance: income - expense, monthlyTrans };
 }
-function formatCurrency(num) { return '$' + num.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
+function formatCurrency(num) { return '₹' + num.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
 function createTransactionEl(t, isHistoryRow) {
     const cat = state.categories.find(c => c.id === t.catId) || { name: 'Deleted', icon: '❓', color: '#ccc' };
     const dateStr = new Date(t.date).toLocaleDateString();
