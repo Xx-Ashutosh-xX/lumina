@@ -247,9 +247,33 @@ function renderManageCategories() {
         list.appendChild(item);
     });
 }
-function openModal() { document.getElementById('transModal').style.display = 'flex'; setTransType('expense'); }
-function openCatModal() { document.getElementById('catModal').style.display = 'flex'; }
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// MODAL CONTROL: Updated to Hide Mobile Nav
+function openModal() { 
+    document.getElementById('transModal').style.display = 'flex'; 
+    setTransType('expense'); 
+    
+    // Hide mobile nav so the "Save" button is not covered
+    const nav = document.querySelector('.mobile-nav');
+    if(nav) nav.style.display = 'none';
+}
+
+function openCatModal() { 
+    document.getElementById('catModal').style.display = 'flex'; 
+    
+    // Hide mobile nav
+    const nav = document.querySelector('.mobile-nav');
+    if(nav) nav.style.display = 'none';
+}
+
+function closeModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
+    
+    // Show mobile nav again (remove inline style so CSS takes over)
+    const nav = document.querySelector('.mobile-nav');
+    if(nav) nav.style.display = ''; 
+}
+
 function setTransType(type) {
     state.modal.type = type;
     document.getElementById('typeExpense').classList.toggle('active', type === 'expense');
@@ -272,12 +296,7 @@ function getMonthStats() {
     const expense = monthlyTrans.filter(t => t.type === 'expense').reduce((sum,t) => sum+t.amount, 0);
     return { income, expense, balance: income - expense, monthlyTrans };
 }
-
-// CHANGED: Use Rupee Symbol and Indian Number Formatting
-function formatCurrency(num) { 
-    return '₹' + num.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0}); 
-}
-
+function formatCurrency(num) { return '₹' + num.toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0}); }
 function createTransactionEl(t, isHistoryRow) {
     const cat = state.categories.find(c => c.id === t.catId) || { name: 'Deleted', icon: '❓', color: '#ccc' };
     const dateStr = new Date(t.date).toLocaleDateString();
